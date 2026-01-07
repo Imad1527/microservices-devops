@@ -9,6 +9,10 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    # 👇 GitHub Secret injected here
+    env:
+      INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
