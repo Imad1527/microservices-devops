@@ -1,5 +1,10 @@
 name: CI/CD Pipeline
 
+# 👇 REQUIRED for pushing images to GHCR
+permissions:
+  contents: read
+  packages: write
+
 on:
   push:
     branches:
@@ -53,8 +58,22 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Auth Service Docker image
-        run: docker build -t auth-service:latest ./auth_service
+      # 👇 Login to GitHub Container Registry
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Product Service Docker image
-        run: docker build -t product-service:latest ./product_service
+      # 👇 Build & push Auth Service image
+      - name: Build and push Auth Service image
+        run: |
+          docker build -t ghcr.io/imad1527/auth-service:latest ./auth_service
+          docker push ghcr.io/imad1527/auth-service:latest
+
+      # 👇 Build & push Product Service image
+      - name: Build and push Product Service image
+        run: |
+          docker build -t ghcr.io/imad1527/product-service:latest ./product_service
+          docker push ghcr.io/imad1527/product-service:latest
