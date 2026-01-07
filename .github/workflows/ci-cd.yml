@@ -8,8 +8,6 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
-    # 👇 GitHub Secret injected here
     env:
       INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
 
@@ -43,3 +41,20 @@ jobs:
         run: |
           cd product_service
           PYTHONPATH=.. pytest
+
+  docker-build:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Auth Service Docker image
+        run: docker build -t auth-service:latest ./auth_service
+
+      - name: Build Product Service Docker image
+        run: docker build -t product-service:latest ./product_service
